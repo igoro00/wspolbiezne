@@ -19,8 +19,13 @@ namespace TP.ConcurrentProgramming.Data.Test
       Vector testinVector = new Vector(0.0, 0.0);
       Ball newInstance = new(testinVector, testinVector);
     }
+    //[TestMethod]
+    //public void Niepowodzenie()
+    //{
+    //        Assert.AreEqual(2, 3);
+    //}
 
-    [TestMethod]
+        [TestMethod]
     public void MoveTestMethod()
     {
       Vector initialPosition = new(10.0, 10.0);
