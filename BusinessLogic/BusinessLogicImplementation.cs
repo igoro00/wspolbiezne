@@ -9,61 +9,92 @@
 //_____________________________________________________________________________________________________________________________________
 
 using System.Diagnostics;
+using System.Numerics;
+using TP.ConcurrentProgramming.Data;
 using UnderneathLayerAPI = TP.ConcurrentProgramming.Data.DataAbstractAPI;
 
 namespace TP.ConcurrentProgramming.BusinessLogic
 {
-  internal class BusinessLogicImplementation : BusinessLogicAbstractAPI
-  {
-    #region ctor
-
-    public BusinessLogicImplementation() : this(null)
-    { }
-
-    internal BusinessLogicImplementation(UnderneathLayerAPI? underneathLayer)
+    internal class BusinessLogicImplementation : BusinessLogicAbstractAPI
     {
-      layerBellow = underneathLayer == null ? UnderneathLayerAPI.GetDataLayer() : underneathLayer;
+        #region ctor
+
+        public BusinessLogicImplementation() : this(null)
+        {
+            MoveTimer = new Timer(Move, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(100));
+
+        }
+
+        private void Move(object? x)
+        {
+            double srednica = 10.0;
+            for (int i = 0; i < numberOfBalls; i++)
+            {
+                var ball = layerBellow.GetBall(i);
+                if (ball.Position.x + srednica > 380 || ball.Position.x < 0)
+                {
+                    layerBellow.SetVelocity(-ball.Velocity.x, ball.Velocity.y, i);
+                }
+                if (ball.Position.y + srednica > 400 || ball.Position.y < 0)
+                {
+                    layerBellow.SetVelocity(ball.Velocity.x, -ball.Velocity.y, i);
+                }
+                layerBellow.UpdateBallPosition(i);
+            }
+        }
+
+        private readonly Timer MoveTimer;
+        private Random RandomGenerator = new();
+
+        internal BusinessLogicImplementation(UnderneathLayerAPI? underneathLayer)
+        {
+            layerBellow = underneathLayer == null ? UnderneathLayerAPI.GetDataLayer() : underneathLayer;
+        }
+
+        #endregion ctor
+
+        #region BusinessLogicAbstractAPI
+
+        public override void Dispose()
+        {
+            if (Disposed)
+                throw new ObjectDisposedException(nameof(BusinessLogicImplementation));
+            MoveTimer.Dispose();
+            layerBellow.Dispose();
+            Disposed = true;
+        }
+
+        public override void Start(int numberOfBalls, Action<IPosition, IBall> upperLayerHandler)
+        {
+            if (Disposed)
+                throw new ObjectDisposedException(nameof(BusinessLogicImplementation));
+            if (upperLayerHandler == null)
+                throw new ArgumentNullException(nameof(upperLayerHandler));
+            this.numberOfBalls = numberOfBalls;
+            layerBellow.Start(numberOfBalls, (startingPosition, databall) => upperLayerHandler(new Position(startingPosition.x, startingPosition.x), new Ball(databall)));
+        }
+
+
+        #endregion BusinessLogicAbstractAPI
+
+        #region private
+
+        private int numberOfBalls;
+
+        private bool Disposed = false;
+
+        private readonly UnderneathLayerAPI layerBellow;
+
+        #endregion private
+
+        #region TestingInfrastructure
+
+        [Conditional("DEBUG")]
+        internal void CheckObjectDisposed(Action<bool> returnInstanceDisposed)
+        {
+            returnInstanceDisposed(Disposed);
+        }
+
+        #endregion TestingInfrastructure
     }
-
-    #endregion ctor
-
-    #region BusinessLogicAbstractAPI
-
-    public override void Dispose()
-    {
-      if (Disposed)
-        throw new ObjectDisposedException(nameof(BusinessLogicImplementation));
-      layerBellow.Dispose();
-      Disposed = true;
-    }
-
-    public override void Start(int numberOfBalls, Action<IPosition, IBall> upperLayerHandler)
-    {
-      if (Disposed)
-        throw new ObjectDisposedException(nameof(BusinessLogicImplementation));
-      if (upperLayerHandler == null)
-        throw new ArgumentNullException(nameof(upperLayerHandler));
-      layerBellow.Start(numberOfBalls, (startingPosition, databall) => upperLayerHandler(new Position(startingPosition.x, startingPosition.x), new Ball(databall)));
-    }
-
-    #endregion BusinessLogicAbstractAPI
-
-    #region private
-
-    private bool Disposed = false;
-
-    private readonly UnderneathLayerAPI layerBellow;
-
-    #endregion private
-
-    #region TestingInfrastructure
-
-    [Conditional("DEBUG")]
-    internal void CheckObjectDisposed(Action<bool> returnInstanceDisposed)
-    {
-      returnInstanceDisposed(Disposed);
-    }
-
-    #endregion TestingInfrastructure
-  }
 }
