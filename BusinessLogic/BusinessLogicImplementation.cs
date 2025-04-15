@@ -19,23 +19,19 @@ namespace TP.ConcurrentProgramming.BusinessLogic
     {
         #region ctor
 
-        public BusinessLogicImplementation() : this(null)
-        {
-            MoveTimer = new Timer(Move, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(100));
-
-        }
+        public BusinessLogicImplementation() : this(null) {}
 
         private void Move(object? x)
         {
-            double srednica = 10.0;
+            double r = 10.0;
             for (int i = 0; i < numberOfBalls; i++)
             {
                 var ball = layerBellow.GetBall(i);
-                if (ball.Position.x + srednica > 380 || ball.Position.x < 0)
+                if (ball.Position.x + r > 380 || ball.Position.x < 0)
                 {
                     layerBellow.SetVelocity(-ball.Velocity.x, ball.Velocity.y, i);
                 }
-                if (ball.Position.y + srednica > 400 || ball.Position.y < 0)
+                if (ball.Position.y + r > 400 || ball.Position.y < 0)
                 {
                     layerBellow.SetVelocity(ball.Velocity.x, -ball.Velocity.y, i);
                 }
@@ -49,6 +45,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         internal BusinessLogicImplementation(UnderneathLayerAPI? underneathLayer)
         {
             layerBellow = underneathLayer == null ? UnderneathLayerAPI.GetDataLayer() : underneathLayer;
+            MoveTimer = new Timer(Move, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(1000 / 25));
         }
 
         #endregion ctor
