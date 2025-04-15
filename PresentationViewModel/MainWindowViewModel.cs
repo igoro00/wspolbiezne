@@ -16,6 +16,9 @@ using ModelIBall = TP.ConcurrentProgramming.Presentation.Model.IBall;
 
 namespace TP.ConcurrentProgramming.Presentation.ViewModel
 {
+
+    delegate void ChangeColorDelegate(string newColor);
+
     public class MainWindowViewModel : ViewModelBase, IDisposable
     {
         #region ctor
@@ -43,9 +46,7 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
 
         public ObservableCollection<ModelIBall> Balls { get; } = new ObservableCollection<ModelIBall>();
 
-        public ICommand ChangeColorCommand => new RelayCommand<string>(ChangeColor);
-
-        private void ChangeColor(string newColor)
+        public ICommand ChangeColorCommand => new RelayCommand<string>((newColor) =>
         {
             foreach (var ball in Balls)
             {
@@ -54,7 +55,7 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
                     modelBall.Color = newColor;
                 }
             }
-        }
+        });
 
         #endregion public API
 
@@ -88,7 +89,6 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
         #endregion IDisposable
 
         #region private
-
         private IDisposable Observer = null;
         private ModelAbstractApi ModelLayer;
         private bool Disposed = false;
