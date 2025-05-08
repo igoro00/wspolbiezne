@@ -8,6 +8,7 @@
 //
 //_____________________________________________________________________________________________________________________________________
 
+using System.Data;
 using System.Diagnostics;
 using System.Numerics;
 using TP.ConcurrentProgramming.Data;
@@ -19,28 +20,22 @@ namespace TP.ConcurrentProgramming.BusinessLogic
     {
         #region ctor
 
-        public BusinessLogicImplementation() : this(null) {}
+        public BusinessLogicImplementation() : this(null)
+        {
+            BallsList = new List<Ball>();
+        }
 
         private void Move(object? x)
         {
-            double r = 10.0;
             for (int i = 0; i < numberOfBalls; i++)
             {
-                var ball = layerBellow.GetBall(i);
-                if (ball.Position.x + r > 380 || ball.Position.x < 0)
-                {
-                    layerBellow.SetVelocity(-ball.Velocity.x, ball.Velocity.y, i);
-                }
-                if (ball.Position.y + r > 400 || ball.Position.y < 0)
-                {
-                    layerBellow.SetVelocity(ball.Velocity.x, -ball.Velocity.y, i);
-                }
                 layerBellow.UpdateBallPosition(i);
             }
+            HandleCollision();
         }
 
+
         private readonly Timer MoveTimer;
-        private Random RandomGenerator = new();
 
         internal BusinessLogicImplementation(UnderneathLayerAPI? underneathLayer)
         {
@@ -68,9 +63,24 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             if (upperLayerHandler == null)
                 throw new ArgumentNullException(nameof(upperLayerHandler));
             this.numberOfBalls = numberOfBalls;
-            layerBellow.Start(numberOfBalls, (startingPosition, databall) => upperLayerHandler(new Position(startingPosition.x, startingPosition.x), new Ball(databall)));
+            layerBellow.Start(
+                numberOfBalls,
+                (startingPosition, databall) =>
+                {
+                    Ball ball = new Ball(databall);
+                    BallsList.Add(ball);
+                    ball.NewVelocityNotification +=
+                        (sender, args) =>
+                        {
+                            layerBellow.SetVelocity(args.x, args.y, databall);
+                        };
+                    upperLayerHandler(
+                        new Position(startingPosition.x, startingPosition.x),
+                        ball
+                    );
+                }
+            );
         }
-
 
         #endregion BusinessLogicAbstractAPI
 
@@ -81,6 +91,19 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         private bool Disposed = false;
 
         private readonly UnderneathLayerAPI layerBellow;
+
+        private List<Ball> BallsList;
+        private void HandleCollision()
+        {
+            Parallel.For(0, BallsList.Count, i =>
+            {
+                BallsList[i].HandleBorderCollision(380, 400);
+                for (int j = i + 1; j < BallsList.Count; j++)
+                {
+                    BallsList[i].HandleBallCollision(BallsList[j]);
+                }
+            });
+        }
 
         #endregion private
 

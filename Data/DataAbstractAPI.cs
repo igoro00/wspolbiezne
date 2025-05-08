@@ -25,11 +25,9 @@ namespace TP.ConcurrentProgramming.Data
 
         public abstract void Start(int numberOfBalls, Action<IVector, IBall> upperLayerHandler);
 
-        public abstract IBall GetBall(int i);
-
         public abstract void UpdateBallPosition(int i);
 
-        public abstract void SetVelocity(double VelocityX, double VelocityY, int i);
+        public abstract void SetVelocity(double VelocityX, double VelocityY, IBall ball);
 
         #endregion public API
 
@@ -66,5 +64,6 @@ namespace TP.ConcurrentProgramming.Data
 
         IVector Velocity { get; set; }
         IVector Position { get; set; }
+        double Radius { get; set; }
     }
 }

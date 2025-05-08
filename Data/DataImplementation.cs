@@ -34,19 +34,10 @@ namespace TP.ConcurrentProgramming.Data
             {
                 Vector startingPosition = new(random.Next(100, 400 - 100), random.Next(100, 400 - 100));
                 Vector initialVelocity = new(random.Next(-8, 8), random.Next(-8, 8));
-                Ball newBall = new(startingPosition, initialVelocity);
+                Ball newBall = new(startingPosition, initialVelocity, 1); //todo : zmienić
                 upperLayerHandler(startingPosition, newBall);
                 BallsList.Add(newBall);
             }
-        }
-
-        public override IBall GetBall(int i)
-        {
-            if (Disposed)
-                throw new ObjectDisposedException(nameof(DataImplementation));
-            if (i < 0 || i >= BallsList.Count)
-                throw new ArgumentOutOfRangeException(nameof(i), "Index out of range");
-            return BallsList[i];
         }
 
         public override void UpdateBallPosition(int i)
@@ -56,16 +47,17 @@ namespace TP.ConcurrentProgramming.Data
             if (i < 0 || i >= BallsList.Count)
                 throw new ArgumentOutOfRangeException(nameof(i), "Index out of range");
             Ball ball = BallsList[i];
-            ball.Move(new Vector(ball.Velocity.x, ball.Velocity.y));
+            ball.Move();
         }
 
-        public override void SetVelocity(double VelocityX, double VelocityY, int i)
+        public override void SetVelocity(double VelocityX, double VelocityY, IBall ball)
         {
             if (Disposed)
                 throw new ObjectDisposedException(nameof(DataImplementation));
-            if (i < 0 || i >= BallsList.Count)
-                throw new ArgumentOutOfRangeException(nameof(i), "Index out of range");
-            Ball ball = BallsList[i];
+            if (ball == null)
+            {
+                throw new ArgumentNullException(nameof(ball), "Ball cannot be null");
+            }
             ball.Velocity = new Vector(VelocityX, VelocityY);
         }
 

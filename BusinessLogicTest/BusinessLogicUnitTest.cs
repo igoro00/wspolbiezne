@@ -72,18 +72,10 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
                 throw new NotImplementedException();
             }
 
-            public override Data.IBall GetBall(int i) {
-                throw new NotImplementedException();
-            }
-
             public override void UpdateBallPosition(int i) {
                 throw new NotImplementedException();
             }
 
-            public override void SetVelocity(double VelocityX, double VelocityY, int i)
-            {
-                throw new NotImplementedException();
-            }
         }
 
         private class DataLayerDisposeFixcure : Data.DataAbstractAPI
@@ -100,20 +92,11 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
                 throw new NotImplementedException();
             }
 
-            public override Data.IBall GetBall(int i)
-            {
-                throw new NotImplementedException();
-            }
-
             public override void UpdateBallPosition(int i)
             {
                 throw new NotImplementedException();
             }
 
-            public override void SetVelocity(double VelocityX, double VelocityY, int i)
-            {
-                throw new NotImplementedException();
-            }
         }
 
         private class DataLayerStartFixcure : Data.DataAbstractAPI
@@ -131,17 +114,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
                 upperLayerHandler(new DataVectorFixture(), new DataBallFixture());
             }
 
-            public override Data.IBall GetBall(int i)
-            {
-                throw new NotImplementedException();
-            }
-
             public override void UpdateBallPosition(int i)
-            {
-                throw new NotImplementedException();
-            }
-
-            public override void SetVelocity(double VelocityX, double VelocityY, int i)
             {
                 throw new NotImplementedException();
             }
