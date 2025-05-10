@@ -32,9 +32,10 @@ namespace TP.ConcurrentProgramming.Data
             Random random = new Random();
             for (int i = 0; i < numberOfBalls; i++)
             {
-                Vector startingPosition = new(random.Next(100, 400 - 100), random.Next(100, 400 - 100));
-                Vector initialVelocity = new(random.Next(-8, 8), random.Next(-8, 8));
-                Ball newBall = new(startingPosition, initialVelocity, random.Next(5,30)); //todo : zmienić
+                int radius = random.Next(5, 30);
+                Vector startingPosition = new(random.Next(radius * 2, 600 - (radius*2)), random.Next(radius*2, 300 - (radius * 2)));
+                Vector initialVelocity = new(random.Next(-2, 2), random.Next(-2, 2));
+                Ball newBall = new(startingPosition, initialVelocity, radius); 
                 BallsList.Add(newBall);
                 upperLayerHandler(startingPosition, newBall);
             }

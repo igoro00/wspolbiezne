@@ -31,7 +31,7 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 
         public double Top
         {
-            get { return TopBackingField; }
+            get { return TopBackingField - (Diameter/2); }
             private set
             {
                 if (TopBackingField == value)
@@ -43,7 +43,7 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 
         public double Left
         {
-            get { return LeftBackingField; }
+            get { return LeftBackingField - (Diameter / 2); }
             private set
             {
                 if (LeftBackingField == value)

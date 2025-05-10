@@ -8,6 +8,7 @@
 //
 //_____________________________________________________________________________________________________________________________________
 
+using System.Numerics;
 using TP.ConcurrentProgramming.Data;
 
 namespace TP.ConcurrentProgramming.BusinessLogic.Test
@@ -39,7 +40,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
             newInstance.CheckObjectDisposed(x => newInstanceDisposed = x);
             Assert.IsTrue(newInstanceDisposed);
             Assert.ThrowsException<ObjectDisposedException>(() => newInstance.Dispose());
-            Assert.ThrowsException<ObjectDisposedException>(() => newInstance.Start(0, (position, ball) => { }));
+            Assert.ThrowsException<ObjectDisposedException>(() => newInstance.Start(0, (position, radius, ball) => { }));
             Assert.IsTrue(dataLayerFixcure.Disposed);
         }
 
@@ -53,7 +54,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
                 int numberOfBalls2Create = 10;
                 newInstance.Start(
                   numberOfBalls2Create,
-                  (startingPosition, ball) => { called++; Assert.IsNotNull(startingPosition); Assert.IsNotNull(ball); });
+                  (startingPosition, radius, ball) => { called++; Assert.IsNotNull(startingPosition); Assert.IsNotNull(radius); Assert.IsNotNull(ball); });
                 Assert.AreEqual<int>(1, called);
                 Assert.IsTrue(dataLayerFixcure.StartCalled);
                 Assert.AreEqual<int>(numberOfBalls2Create, dataLayerFixcure.NumberOfBallseCreated);
@@ -66,6 +67,11 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
         {
             public override void Dispose()
             { }
+
+            public override void SetVelocity(double VelocityX, double VelocityY, Data.IBall ball)
+            {
+                throw new NotImplementedException();
+            }
 
             public override void Start(int numberOfBalls, Action<IVector, Data.IBall> upperLayerHandler)
             {
@@ -87,6 +93,11 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
                 Disposed = true;
             }
 
+            public override void SetVelocity(double VelocityX, double VelocityY, Data.IBall ball)
+            {
+                throw new NotImplementedException();
+            }
+
             public override void Start(int numberOfBalls, Action<IVector, Data.IBall> upperLayerHandler)
             {
                 throw new NotImplementedException();
@@ -106,6 +117,11 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
 
             public override void Dispose()
             { }
+
+            public override void SetVelocity(double VelocityX, double VelocityY, Data.IBall ball)
+            {
+                throw new NotImplementedException();
+            }
 
             public override void Start(int numberOfBalls, Action<IVector, Data.IBall> upperLayerHandler)
             {
@@ -129,6 +145,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
             {
                 public IVector Velocity { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
                 public IVector Position { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+                public double Radius { get; set; }
 
                 public event EventHandler<IVector>? NewPositionNotification = null;
             }

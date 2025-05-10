@@ -56,20 +56,20 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
         }
 
-        public void HandleBorderCollision(double width, double height)
+        public void HandleBorderCollision(double width, double height, double borderThickness)
         {
 
             //lewo prawo
             if (dataBall.Velocity.x > 0) // jedzie w prawo
             {
-                if (dataBall.Position.x + dataBall.Radius > width) // za bardzo w prawo
+                if (dataBall.Position.x + dataBall.Radius > width - (borderThickness*2)) // za bardzo w prawo
                 {
                     NewVelocityNotification?.Invoke(this, new Position(-dataBall.Velocity.x, dataBall.Velocity.y));
                 }
             }
             if (dataBall.Velocity.x < 0) // jedzie w lewo
             {
-                if (dataBall.Position.x < 0) // za bardzo w lewo
+                if (dataBall.Position.x - dataBall.Radius < 0) // za bardzo w lewo
                 {
                     NewVelocityNotification?.Invoke(this, new Position(-dataBall.Velocity.x, dataBall.Velocity.y));
                 }
@@ -79,14 +79,14 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             // gora dol
             if (dataBall.Velocity.y > 0) // jedzie w dół
             {
-                if (dataBall.Position.y + dataBall.Radius > height) // za bardzo w prawo
+                if (dataBall.Position.y + dataBall.Radius > height - (borderThickness*2)) // za bardzo w dół
                 {
                     NewVelocityNotification?.Invoke(this, new Position(dataBall.Velocity.x, -dataBall.Velocity.y));
                 }
             }
             if (dataBall.Velocity.y < 0) // jedzie w góre
             {
-                if (dataBall.Position.y < 0) // za bardzo w lewo
+                if (dataBall.Position.y - dataBall.Radius < 0) // za bardzo w góre
                 {
                     NewVelocityNotification?.Invoke(this, new Position(dataBall.Velocity.x, -dataBall.Velocity.y));
                 }

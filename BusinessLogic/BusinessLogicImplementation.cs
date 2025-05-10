@@ -34,7 +34,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         internal BusinessLogicImplementation(UnderneathLayerAPI? underneathLayer)
         {
             layerBellow = underneathLayer == null ? UnderneathLayerAPI.GetDataLayer() : underneathLayer;
-            MoveTimer = new Timer(Move, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(1000 / 25));
+            MoveTimer = new Timer(Move, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(1000 / 60));
             BallsList = new List<Ball>();
         }
 
@@ -95,7 +95,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             {
                 lock (BallsList[i])
                 {
-                    BallsList[i].HandleBorderCollision(400-4-4, 300-4-4);
+                    BallsList[i].HandleBorderCollision(600, 300, 4);
                     for (int j = i + 1; j < BallsList.Count; j++)
                     {
                         lock (BallsList[j])
