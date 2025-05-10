@@ -19,10 +19,11 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 {
     public class ModelBall : IBall
     {
-        public ModelBall(double top, double left, LogicIBall underneathBall)
+        public ModelBall(double top, double left, double diameter, LogicIBall underneathBall)
         {
             TopBackingField = top;
             LeftBackingField = left;
+            Diameter = diameter;
             underneathBall.NewPositionNotification += NewPositionNotification;
         }
 
@@ -52,7 +53,7 @@ namespace TP.ConcurrentProgramming.Presentation.Model
             }
         }
 
-        public double Diameter { get; init; } = 0;
+        public double Diameter { get; init; }
 
         private string _color = "Blue";
         public string Color

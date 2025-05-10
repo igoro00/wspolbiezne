@@ -53,18 +53,43 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             // Zaktualizuj 
             NewVelocityNotification?.Invoke(this, new Position(dataBall.Velocity.x - impulse * m2 * nx, dataBall.Velocity.y - impulse * m2 * ny));
             otherBall.NewVelocityNotification?.Invoke(otherBall, new Position(otherBall.dataBall.Velocity.x + impulse * m1 * nx, otherBall.dataBall.Velocity.y + impulse * m1 * ny));
-            
+
         }
 
         public void HandleBorderCollision(double width, double height)
         {
-            if (dataBall.Position.x + dataBall.Radius > width || dataBall.Position.x < 0)
+
+            //lewo prawo
+            if (dataBall.Velocity.x > 0) // jedzie w prawo
             {
-                NewVelocityNotification?.Invoke(this, new Position(-dataBall.Velocity.x, dataBall.Velocity.y));
+                if (dataBall.Position.x + dataBall.Radius > width) // za bardzo w prawo
+                {
+                    NewVelocityNotification?.Invoke(this, new Position(-dataBall.Velocity.x, dataBall.Velocity.y));
+                }
             }
-            if (dataBall.Position.y + dataBall.Radius > height || dataBall.Position.y < 0)
+            if (dataBall.Velocity.x < 0) // jedzie w lewo
             {
-                NewVelocityNotification?.Invoke(this, new Position(dataBall.Velocity.x, -dataBall.Velocity.y));
+                if (dataBall.Position.x < 0) // za bardzo w lewo
+                {
+                    NewVelocityNotification?.Invoke(this, new Position(-dataBall.Velocity.x, dataBall.Velocity.y));
+                }
+            }
+
+
+            // gora dol
+            if (dataBall.Velocity.y > 0) // jedzie w dół
+            {
+                if (dataBall.Position.y + dataBall.Radius > height) // za bardzo w prawo
+                {
+                    NewVelocityNotification?.Invoke(this, new Position(dataBall.Velocity.x, -dataBall.Velocity.y));
+                }
+            }
+            if (dataBall.Velocity.y < 0) // jedzie w góre
+            {
+                if (dataBall.Position.y < 0) // za bardzo w lewo
+                {
+                    NewVelocityNotification?.Invoke(this, new Position(dataBall.Velocity.x, -dataBall.Velocity.y));
+                }
             }
         }
 

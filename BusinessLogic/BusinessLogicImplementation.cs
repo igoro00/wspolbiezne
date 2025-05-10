@@ -8,10 +8,7 @@
 //
 //_____________________________________________________________________________________________________________________________________
 
-using System.Data;
 using System.Diagnostics;
-using System.Numerics;
-using TP.ConcurrentProgramming.Data;
 using UnderneathLayerAPI = TP.ConcurrentProgramming.Data.DataAbstractAPI;
 
 namespace TP.ConcurrentProgramming.BusinessLogic
@@ -20,14 +17,11 @@ namespace TP.ConcurrentProgramming.BusinessLogic
     {
         #region ctor
 
-        public BusinessLogicImplementation() : this(null)
-        {
-            BallsList = new List<Ball>();
-        }
+        public BusinessLogicImplementation() : this(null) {}
 
         private void Move(object? x)
         {
-            for (int i = 0; i < numberOfBalls; i++)
+            for (int i = 0; i < BallsList.Count; i++)
             {
                 layerBellow.UpdateBallPosition(i);
             }
@@ -41,6 +35,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         {
             layerBellow = underneathLayer == null ? UnderneathLayerAPI.GetDataLayer() : underneathLayer;
             MoveTimer = new Timer(Move, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(1000 / 25));
+            BallsList = new List<Ball>();
         }
 
         #endregion ctor
@@ -56,7 +51,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             Disposed = true;
         }
 
-        public override void Start(int numberOfBalls, Action<IPosition, IBall> upperLayerHandler)
+        public override void Start(int numberOfBalls, Action<IPosition, double, IBall> upperLayerHandler)
         {
             if (Disposed)
                 throw new ObjectDisposedException(nameof(BusinessLogicImplementation));
@@ -76,6 +71,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                         };
                     upperLayerHandler(
                         new Position(startingPosition.x, startingPosition.x),
+                        databall.Radius*2,
                         ball
                     );
                 }
@@ -97,10 +93,16 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         {
             Parallel.For(0, BallsList.Count, i =>
             {
-                BallsList[i].HandleBorderCollision(380, 400);
-                for (int j = i + 1; j < BallsList.Count; j++)
+                lock (BallsList[i])
                 {
-                    BallsList[i].HandleBallCollision(BallsList[j]);
+                    BallsList[i].HandleBorderCollision(400-4-4, 300-4-4);
+                    for (int j = i + 1; j < BallsList.Count; j++)
+                    {
+                        lock (BallsList[j])
+                        {
+                            BallsList[i].HandleBallCollision(BallsList[j]);
+                        }
+                    }
                 }
             });
         }
