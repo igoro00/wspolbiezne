@@ -9,6 +9,9 @@
 //_____________________________________________________________________________________________________________________________________
 
 using System;
+using System.Collections.Concurrent;
+using System.Diagnostics;
+using System.Text;
 using System.Diagnostics;
 
 namespace TP.ConcurrentProgramming.Data
@@ -39,6 +42,7 @@ namespace TP.ConcurrentProgramming.Data
                 BallsList.Add(newBall);
                 upperLayerHandler(startingPosition, newBall);
             }
+            logger();
         }
 
         public override void UpdateBallPosition(int i)
@@ -62,6 +66,25 @@ namespace TP.ConcurrentProgramming.Data
             ball.Velocity = new Vector(VelocityX, VelocityY);
         }
 
+        public override void LogCollision(ILoggerEntry loggerEntry)
+        {
+            if (Disposed)
+                throw new ObjectDisposedException(nameof(DataImplementation));
+            if (loggerEntry == null)
+            {
+                throw new ArgumentNullException(nameof(loggerEntry), "Logger entry cannot be null");
+            }
+            logQueue.Add(loggerEntry);
+        }
+
+        public override IVector? CreateVector(double? x, double? y) { 
+            if (x == null || y == null)
+            {
+                return null;
+            } 
+            return new Vector(x??0, y??0);
+        }
+
         #endregion DataAbstractAPI
         #region IDisposable
 
@@ -72,6 +95,8 @@ namespace TP.ConcurrentProgramming.Data
                 if (disposing)
                 {
                     BallsList.Clear();
+                    logQueue.CompleteAdding();
+                    cts.Cancel();
                 }
                 Disposed = true;
             }
@@ -89,6 +114,39 @@ namespace TP.ConcurrentProgramming.Data
         #endregion IDisposable
 
         #region private
+
+        private BlockingCollection<ILoggerEntry> logQueue = new ();
+        private CancellationTokenSource cts = new ();
+        private void logger() {
+            Task.Run(() => {
+                foreach (var item in logQueue.GetConsumingEnumerable(cts.Token))
+                {
+                    StringBuilder sb = new ();
+                    sb.Append($"[{item.TimeStamp:yyyy-MM-dd HH:mm:ss.fff}]");
+                    sb.Append($" {item.BallId1.ToString()}");
+                    if (item.BallId2 != null)
+                    {
+                        sb.Append($" {item.BallId2.ToString()}");
+                    }
+                    sb.Append($" {item.Position1.ToString()}");
+                    if (item.Position2 != null) {
+                        sb.Append($" {item.Position2.ToString()}");
+                    };
+                    sb.Append($" {item.Velocity1Before.ToString()}");
+                    if (item.Velocity2Before != null)
+                    {
+                        sb.Append($" {item.Velocity2Before.ToString()}");
+                    }
+                    sb.Append($" {item.Velocity1After.ToString()}");
+                    if (item.Velocity2After != null)
+                    {
+                        sb.Append($" {item.Velocity2After.ToString()}");
+                    }
+                    Trace.WriteLine(sb.ToString());
+                }
+                Trace.WriteLine("Logger stopped.");
+            }, cts.Token);
+        }
 
         //private bool disposedValue;
         private bool Disposed = false;

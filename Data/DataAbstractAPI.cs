@@ -8,6 +8,8 @@
 //
 //_____________________________________________________________________________________________________________________________________
 
+using System.ComponentModel.DataAnnotations;
+
 namespace TP.ConcurrentProgramming.Data
 {
     public abstract class DataAbstractAPI : IDisposable
@@ -23,11 +25,15 @@ namespace TP.ConcurrentProgramming.Data
 
         #region public API
 
+        public abstract void LogCollision(ILoggerEntry loggerEntry);
+
         public abstract void Start(int numberOfBalls, Action<IVector, IBall> upperLayerHandler);
 
         public abstract void UpdateBallPosition(int i);
 
         public abstract void SetVelocity(double VelocityX, double VelocityY, IBall ball);
+
+        public abstract IVector? CreateVector(double? x, double? y);
 
         #endregion public API
 
@@ -66,4 +72,21 @@ namespace TP.ConcurrentProgramming.Data
         IVector Position { get; set; }
         double Radius { get; set; }
     }
+
+
+    public interface ILoggerEntry
+    {
+        DateTime TimeStamp { get; init; }
+        int BallId1 { get; init; }
+        int? BallId2 { get; init; }
+        double Radius1 { get; init; }
+        double? Radius2 { get; init; }
+        IVector Position1 { get; init; }
+        IVector? Position2 { get; init; }
+        IVector Velocity1Before { get; init; }
+        IVector? Velocity2Before { get; init; }
+        IVector Velocity1After { get; init; }
+        IVector? Velocity2After { get; init; }
+    }
+
 }

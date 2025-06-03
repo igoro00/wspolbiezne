@@ -62,15 +62,16 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 numberOfBalls,
                 (startingPosition, databall) =>
                 {
-                    Ball ball = new Ball(databall);
+                    Ball ball = new Ball(databall, layerBellow.CreateVector);
                     BallsList.Add(ball);
                     ball.NewVelocityNotification +=
-                        (sender, args) =>
+                        (sender, loggerEntry) =>
                         {
-                            layerBellow.SetVelocity(args.x, args.y, databall);
+                            layerBellow.SetVelocity(loggerEntry.Velocity1After.x, loggerEntry.Velocity1After.y, databall);
+                            layerBellow.LogCollision(loggerEntry);
                         };
                     upperLayerHandler(
-                        new Position(startingPosition.x, startingPosition.x),
+                        new Position(startingPosition.x, startingPosition.y),
                         databall.Radius*2,
                         ball
                     );

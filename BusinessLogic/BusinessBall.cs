@@ -15,9 +15,11 @@ namespace TP.ConcurrentProgramming.BusinessLogic
     internal class Ball : IBall
     {
         public Data.IBall dataBall;
-        public Ball(Data.IBall ball)
+
+        public Ball(Data.IBall ball, Func<double?, double?, IVector?> cv)
         {
             dataBall = ball;
+            createVector = cv;
             ball.NewPositionNotification += RaisePositionChangeEvent;
         }
 
@@ -51,9 +53,14 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             double impulse = (2 * dot) / (m1 + m2);
 
             // Zaktualizuj 
-            NewVelocityNotification?.Invoke(this, new Position(dataBall.Velocity.x - impulse * m2 * nx, dataBall.Velocity.y - impulse * m2 * ny));
-            otherBall.NewVelocityNotification?.Invoke(otherBall, new Position(otherBall.dataBall.Velocity.x + impulse * m1 * nx, otherBall.dataBall.Velocity.y + impulse * m1 * ny));
+            IPosition velocity1After = new Position(dataBall.Velocity.x - impulse * m2 * nx, dataBall.Velocity.y - impulse * m2 * ny);
+            IPosition velocity2After = new Position(otherBall.dataBall.Velocity.x + impulse * m1 * nx, otherBall.dataBall.Velocity.y + impulse * m1 * ny);
 
+            ILoggerEntry loggerEntry = OnCollision(otherBall, velocity1After, velocity2After);
+            ILoggerEntry loggerEntry2 = otherBall.OnCollision(this, velocity2After, velocity1After);
+          
+            NewVelocityNotification?.Invoke(this, loggerEntry);
+            otherBall.NewVelocityNotification?.Invoke(otherBall, loggerEntry2);
         }
 
         public void HandleBorderCollision(double width, double height, double borderThickness)
@@ -64,14 +71,14 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             {
                 if (dataBall.Position.x + dataBall.Radius > width - (borderThickness*2)) // za bardzo w prawo
                 {
-                    NewVelocityNotification?.Invoke(this, new Position(-dataBall.Velocity.x, dataBall.Velocity.y));
+                    NewVelocityNotification?.Invoke(this, OnCollision(null, new Position(-dataBall.Velocity.x, dataBall.Velocity.y), null));
                 }
             }
             if (dataBall.Velocity.x < 0) // jedzie w lewo
             {
                 if (dataBall.Position.x - dataBall.Radius < 0) // za bardzo w lewo
                 {
-                    NewVelocityNotification?.Invoke(this, new Position(-dataBall.Velocity.x, dataBall.Velocity.y));
+                    NewVelocityNotification?.Invoke(this, OnCollision(null, new Position(-dataBall.Velocity.x, dataBall.Velocity.y), null));
                 }
             }
 
@@ -81,19 +88,37 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             {
                 if (dataBall.Position.y + dataBall.Radius > height - (borderThickness*2)) // za bardzo w dół
                 {
-                    NewVelocityNotification?.Invoke(this, new Position(dataBall.Velocity.x, -dataBall.Velocity.y));
+                    NewVelocityNotification?.Invoke(this, OnCollision(null, new Position(dataBall.Velocity.x, -dataBall.Velocity.y), null));
                 }
             }
             if (dataBall.Velocity.y < 0) // jedzie w góre
             {
                 if (dataBall.Position.y - dataBall.Radius < 0) // za bardzo w góre
                 {
-                    NewVelocityNotification?.Invoke(this, new Position(dataBall.Velocity.x, -dataBall.Velocity.y));
+                    NewVelocityNotification?.Invoke(this, OnCollision(null, new Position(dataBall.Velocity.x, -dataBall.Velocity.y), null));
                 }
             }
         }
 
-        public event EventHandler<IPosition>? NewVelocityNotification;
+        public ILoggerEntry OnCollision(Ball? otherBall, IPosition newVelocity1, IPosition? newVelocity2)
+        {
+            return new LoggerEntry
+            {
+                TimeStamp = DateTime.Now,
+                BallId1 = GetHashCode(),
+                BallId2 = otherBall?.GetHashCode(),
+                Radius1 = dataBall.Radius,
+                Radius2 = otherBall?.dataBall?.Radius,
+                Position1 = dataBall.Position,
+                Position2 = otherBall?.dataBall?.Position,
+                Velocity1Before = dataBall.Velocity,
+                Velocity2Before = otherBall?.dataBall?.Velocity,
+                Velocity1After = createVector(newVelocity1.x, newVelocity1.y)!,
+                Velocity2After = createVector(newVelocity2?.x, newVelocity2?.y)
+            };
+        }
+
+        public event EventHandler<ILoggerEntry>? NewVelocityNotification;
 
         #region IBall
 
@@ -101,6 +126,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
         #endregion IBall
         #region private
+        private Func<double?, double?, IVector?> createVector;
 
         private bool IsBallCollision(Ball otherBall)
         {

@@ -39,8 +39,8 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
             ball.NewVelocityNotification += (sender, position) =>
             {
                 velocityChanged = true;
-                Assert.AreEqual(-5, position.x); // Velocity should be reversed
-                Assert.AreEqual(0, position.y);  // Y velocity should remain unchanged
+                Assert.AreEqual(-5, position.Velocity1After.x); // Velocity should be reversed
+                Assert.AreEqual(0, position.Velocity1After.y);  // Y velocity should remain unchanged
             };
 
             ball.HandleBorderCollision(600, 300, 4);
