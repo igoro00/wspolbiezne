@@ -82,6 +82,15 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
                 throw new NotImplementedException();
             }
 
+            public override void LogCollision(ILoggerEntry loggerEntry)
+            {
+                throw new NotImplementedException();
+            }
+            public override IVector? CreateVector(double? x, double? y)
+            {
+                throw new NotImplementedException();
+            }
+
         }
 
         private class DataLayerDisposeFixcure : Data.DataAbstractAPI
@@ -104,6 +113,15 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
             }
 
             public override void UpdateBallPosition(int i)
+            {
+                throw new NotImplementedException();
+            }
+
+            public override void LogCollision(ILoggerEntry loggerEntry)
+            {
+                throw new NotImplementedException();
+            }
+            public override IVector? CreateVector(double? x, double? y)
             {
                 throw new NotImplementedException();
             }
@@ -148,6 +166,15 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
                 public double Radius { get; set; }
 
                 public event EventHandler<IVector>? NewPositionNotification = null;
+            }
+
+            public override void LogCollision(ILoggerEntry loggerEntry)
+            {
+                throw new NotImplementedException();
+            }
+            public override IVector? CreateVector(double? x, double? y)
+            {
+                return new DataVectorFixture { x = x ?? 0, y = y ?? 0 };
             }
         }
 

@@ -17,7 +17,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
         public void MoveTestMethod()
         {
             DataBallFixture dataBallFixture = new DataBallFixture();
-            Ball newInstance = new(dataBallFixture);
+            Ball newInstance = new(dataBallFixture,(double? a, double? b) => new VectorFixture(a??0, b??0));
             int numberOfCallBackCalled = 0;
             newInstance.NewPositionNotification += (sender, position) => { Assert.IsNotNull(sender); Assert.IsNotNull(position); numberOfCallBackCalled++; };
             dataBallFixture.Move();
@@ -33,7 +33,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
                 Velocity = new VectorFixture(5, 0),     // Moving right
                 Radius = 5
             };
-            Ball ball = new Ball(dataBallFixture);
+            Ball ball = new Ball(dataBallFixture, (double? a, double? b) => new VectorFixture(a??0, b??0));
             bool velocityChanged = false;
 
             ball.NewVelocityNotification += (sender, position) =>
@@ -65,8 +65,8 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
                 Radius = 10
             };
 
-            Ball ball1 = new Ball(ball1Data);
-            Ball ball2 = new Ball(ball2Data);
+            Ball ball1 = new Ball(ball1Data,(double? a, double? b) => new VectorFixture(a??0, b??0));
+            Ball ball2 = new Ball(ball2Data,(double? a, double? b) => new VectorFixture(a??0, b??0));
             bool velocityChanged = false;
 
             ball1.NewVelocityNotification += (sender, position) =>
@@ -96,8 +96,8 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
                 Radius = 10
             };
 
-            Ball ball1 = new Ball(ball1Data);
-            Ball ball2 = new Ball(ball2Data);
+            Ball ball1 = new Ball(ball1Data,(double? a, double? b) => new VectorFixture(a??0, b??0));
+            Ball ball2 = new Ball(ball2Data,(double? a, double? b) => new VectorFixture(a??0, b??0));
             bool velocityChanged = false;
 
             ball1.NewVelocityNotification += (sender, position) =>

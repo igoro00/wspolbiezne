@@ -12,7 +12,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text;
-using System.Diagnostics;
 
 namespace TP.ConcurrentProgramming.Data
 {
@@ -96,7 +95,8 @@ namespace TP.ConcurrentProgramming.Data
                 {
                     BallsList.Clear();
                     logQueue.CompleteAdding();
-                    cts.Cancel();
+                    isLogQueueEmpty.WaitOne(500);
+                    isLogQueueEmpty.Dispose();
                 }
                 Disposed = true;
             }
@@ -116,36 +116,52 @@ namespace TP.ConcurrentProgramming.Data
         #region private
 
         private BlockingCollection<ILoggerEntry> logQueue = new ();
-        private CancellationTokenSource cts = new ();
+        private ManualResetEvent isLogQueueEmpty = new (false);
         private void logger() {
             Task.Run(() => {
-                foreach (var item in logQueue.GetConsumingEnumerable(cts.Token))
+                string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH.mm.ss");
+                string logFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "log_" + timestamp + ".csv");
+                bool fileExists = File.Exists(logFilePath);
+
+                using (StreamWriter writer = new StreamWriter(logFilePath, true))
                 {
-                    StringBuilder sb = new ();
-                    sb.Append($"[{item.TimeStamp:yyyy-MM-dd HH:mm:ss.fff}]");
-                    sb.Append($" {item.BallId1.ToString()}");
-                    if (item.BallId2 != null)
+                    if (!fileExists)
                     {
-                        sb.Append($" {item.BallId2.ToString()}");
+                        writer.WriteLine("Timestamp,Ball1,Ball2,r1,r2,x1,y1,x2,y2,vX1old,vY1old,vX2old,vY2old,vX1new,vY1new,vX2new,vY2new");
                     }
-                    sb.Append($" {item.Position1.ToString()}");
-                    if (item.Position2 != null) {
-                        sb.Append($" {item.Position2.ToString()}");
-                    };
-                    sb.Append($" {item.Velocity1Before.ToString()}");
-                    if (item.Velocity2Before != null)
+             
+                    foreach (var item in logQueue.GetConsumingEnumerable())
                     {
-                        sb.Append($" {item.Velocity2Before.ToString()}");
+                        StringBuilder sb = new();
+                        sb.Append($"{item.TimeStamp:yyyy-MM-dd HH:mm:ss.fff}");
+                        sb.Append($",{item.BallId1.ToString()}");
+     
+                        sb.Append($",{item.BallId2?.ToString()??""}");
+
+                        sb.Append($",{item.Radius1.ToString()}");
+                        sb.Append($",{item.Radius2?.ToString()??""}");
+
+                        sb.Append($",{item.Position1.x.ToString()}");
+                        sb.Append($",{item.Position1.y.ToString()}");
+                        sb.Append($",{item.Position2?.x.ToString()??""}");
+                        sb.Append($",{item.Position2?.x.ToString()??""}");
+
+                        sb.Append($",{item.Velocity1Before.x.ToString()}");
+                        sb.Append($",{item.Velocity1Before.y.ToString()}");
+                        sb.Append($",{item.Velocity2Before?.x.ToString()??""}");
+                        sb.Append($",{item.Velocity2Before?.y.ToString()??""}");
+
+                        sb.Append($",{item.Velocity1After.x.ToString()}");
+                        sb.Append($",{item.Velocity1After.y.ToString()}");
+                        sb.Append($",{item.Velocity2After?.x.ToString()??""}");
+                        sb.Append($",{item.Velocity2After?.y.ToString()??""}");
+                        
+                        writer.WriteLine(sb.ToString());
                     }
-                    sb.Append($" {item.Velocity1After.ToString()}");
-                    if (item.Velocity2After != null)
-                    {
-                        sb.Append($" {item.Velocity2After.ToString()}");
-                    }
-                    Trace.WriteLine(sb.ToString());
+                    writer.Flush();
                 }
-                Trace.WriteLine("Logger stopped.");
-            }, cts.Token);
+                isLogQueueEmpty.Set(); // Signal that the log queue is empty
+            });
         }
 
         //private bool disposedValue;
