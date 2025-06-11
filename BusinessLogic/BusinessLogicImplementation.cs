@@ -9,6 +9,7 @@
 //_____________________________________________________________________________________________________________________________________
 
 using System.Diagnostics;
+using TP.ConcurrentProgramming.Data;
 using UnderneathLayerAPI = TP.ConcurrentProgramming.Data.DataAbstractAPI;
 
 namespace TP.ConcurrentProgramming.BusinessLogic
@@ -34,6 +35,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         internal BusinessLogicImplementation(UnderneathLayerAPI? underneathLayer)
         {
             layerBellow = underneathLayer == null ? UnderneathLayerAPI.GetDataLayer() : underneathLayer;
+            logger = UnderneathLayerAPI.GetLogger();
             MoveTimer = new Timer(Move, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(1000 / 60));
             BallsList = new List<Ball>();
         }
@@ -48,6 +50,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 throw new ObjectDisposedException(nameof(BusinessLogicImplementation));
             MoveTimer.Dispose();
             layerBellow.Dispose();
+            logger.Dispose();
             Disposed = true;
         }
 
@@ -59,16 +62,15 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 throw new ArgumentNullException(nameof(upperLayerHandler));
             this.numberOfBalls = numberOfBalls;
             layerBellow.Start(
-                numberOfBalls,
+                this.numberOfBalls,
                 (startingPosition, databall) =>
                 {
                     Ball ball = new Ball(databall, layerBellow.CreateVector);
                     BallsList.Add(ball);
                     ball.NewVelocityNotification +=
-                        (sender, loggerEntry) =>
+                        (sender, collision) =>
                         {
-                            layerBellow.SetVelocity(loggerEntry.Velocity1After.x, loggerEntry.Velocity1After.y, databall);
-                            layerBellow.LogCollision(loggerEntry);
+                            layerBellow.SetVelocity(collision.Velocity1After.x, collision.Velocity1After.y, databall);
                         };
                     upperLayerHandler(
                         new Position(startingPosition.x, startingPosition.y),
@@ -83,6 +85,8 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
         #region private
 
+        private readonly Logger logger;
+
         private int numberOfBalls;
 
         private bool Disposed = false;
@@ -96,12 +100,16 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             {
                 lock (BallsList[i])
                 {
-                    BallsList[i].HandleBorderCollision(600, 300, 4);
+                    logger.LogCollision(
+                        BallsList[i].HandleBorderCollision(600, 300, 4)
+                    );
                     for (int j = i + 1; j < BallsList.Count; j++)
                     {
                         lock (BallsList[j])
                         {
-                            BallsList[i].HandleBallCollision(BallsList[j]);
+                            logger.LogCollision(
+                                BallsList[i].HandleBallCollision(BallsList[j])
+                            );
                         }
                     }
                 }

@@ -82,7 +82,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
                 throw new NotImplementedException();
             }
 
-            public override void LogCollision(ILoggerEntry loggerEntry)
+            public override void LogCollision(ICollision loggerEntry)
             {
                 throw new NotImplementedException();
             }
@@ -117,7 +117,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
                 throw new NotImplementedException();
             }
 
-            public override void LogCollision(ILoggerEntry loggerEntry)
+            public override void LogCollision(ICollision loggerEntry)
             {
                 throw new NotImplementedException();
             }
@@ -168,7 +168,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
                 public event EventHandler<IVector>? NewPositionNotification = null;
             }
 
-            public override void LogCollision(ILoggerEntry loggerEntry)
+            public override void LogCollision(ICollision loggerEntry)
             {
                 throw new NotImplementedException();
             }

@@ -21,11 +21,14 @@ namespace TP.ConcurrentProgramming.Data
             return modelInstance.Value;
         }
 
+        public static Logger GetLogger()
+        {
+            return loggerInstance.Value;
+        }
+
         #endregion Layer Factory
 
         #region public API
-
-        public abstract void LogCollision(ILoggerEntry loggerEntry);
 
         public abstract void Start(int numberOfBalls, Action<IVector, IBall> upperLayerHandler);
 
@@ -34,7 +37,7 @@ namespace TP.ConcurrentProgramming.Data
         public abstract void SetVelocity(double VelocityX, double VelocityY, IBall ball);
 
         public abstract IVector? CreateVector(double? x, double? y);
-
+        
         #endregion public API
 
         #region IDisposable
@@ -45,7 +48,8 @@ namespace TP.ConcurrentProgramming.Data
 
         #region private
 
-        private static Lazy<DataAbstractAPI> modelInstance = new Lazy<DataAbstractAPI>(() => new DataImplementation());
+        private static Lazy<DataAbstractAPI> modelInstance = new(() => new DataImplementation());
+        private static Lazy<Logger> loggerInstance = new(() => new Logger());
 
         #endregion private
     }
@@ -73,8 +77,7 @@ namespace TP.ConcurrentProgramming.Data
         double Radius { get; set; }
     }
 
-
-    public interface ILoggerEntry
+    public interface ICollision
     {
         DateTime TimeStamp { get; init; }
         int BallId1 { get; init; }
@@ -88,5 +91,4 @@ namespace TP.ConcurrentProgramming.Data
         IVector Velocity1After { get; init; }
         IVector? Velocity2After { get; init; }
     }
-
 }

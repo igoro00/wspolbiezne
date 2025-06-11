@@ -7,7 +7,7 @@ using TP.ConcurrentProgramming.Data;
 
 namespace TP.ConcurrentProgramming.BusinessLogic
 {
-    internal record LoggerEntry : Data.ILoggerEntry
+    internal record Collision : Data.ICollision
     {
         public required DateTime TimeStamp { get; init; }
         public required int BallId1 { get; init; }
